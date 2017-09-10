@@ -2,8 +2,8 @@
 #include <ESP8266WiFi.h>
 #include <SPI.h>
 
-static const char ssid[] = "router power";
-static const char password[] = "powertotherouter";
+static const char ssid[] = "my_ssid";
+static const char password[] = "my_password";
 static const char host[] = "https://jsonplaceholder.typicode.com";
 
 static int status = WL_IDLE_STATUS;
