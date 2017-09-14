@@ -7,8 +7,8 @@ void printJSON();
 #define BAUD_RATE 115200
 #define HTTP_PORT 80
 
-static const char ssid[] = "router power";
-static const char password[] = "powertotherouter";
+static const char ssid[] = "my_ssid";
+static const char password[] = "my_password";
 static const char host[] = "jsonplaceholder.typicode.com";
 
 static int status = WL_IDLE_STATUS;
