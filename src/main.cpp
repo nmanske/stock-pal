@@ -2,7 +2,7 @@
 #include <ESP8266WiFi.h>
 #include <SPI.h>
 
-void printJSON();
+String getResponse();
 
 #define BAUD_RATE 115200
 #define HTTP_PORT 80
@@ -23,7 +23,7 @@ void setup() {
     }
 
     while (WiFi.status() != WL_CONNECTED) {
-        Serial.println("Attempting to connect to SSID:");
+        Serial.print("Attempting to connect to SSID: ");
         Serial.println(ssid);
         status = WiFi.begin(ssid, password);
         delay(10000);
@@ -38,33 +38,45 @@ void setup() {
 }
 
 void loop() {
-    delay(10000);
-    printJSON();
+    String response = getResponse();
+    Serial.println("Response:\n");
+    Serial.println(response);
+    Serial.println();
 }
 
-void printJSON() {
+String getResponse() {
     Serial.print("Connecting to ");
     Serial.println(host);
 
     WiFiClient client;
     if (!client.connect(host, HTTP_PORT)) {
         Serial.println("Connection failed");
-        return;
+        return "No response";
     }
 
-    String url = "/posts";
+    String url = "/users";
+    String request = String("GET ") + url + " HTTP/1.1\r\n" +
+                            "Host: " + host + "\r\n" + 
+                            "Connection: close\r\n\r\n";
+
     Serial.print("Requesting URL: ");
-    Serial.print(url);
+    Serial.println(url);
+    Serial.println("Request:");
+    Serial.println(request);
+    Serial.println();
 
-    client.print(String("GET") + url +
-                 " HTTP/1.1\r\n");
-    delay(10);
+    client.print(request);
 
-    Serial.println("Response:");
+    while(!client.available()) {
+        delay(1000);
+    }
+
+    String response = "";
     while(client.available()){
-        String line = client.readStringUntil('\r');
-        Serial.print(line);
+        response += client.readStringUntil('\r');
     }
 
     Serial.println("\nClosing connection...\n");
+
+    return response;
 }
