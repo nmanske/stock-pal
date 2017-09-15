@@ -5,13 +5,14 @@
 String getResponse();
 
 #define BAUD_RATE 115200
-#define HTTP_PORT 80
+#define HTTPS_PORT 443
 
-static const char ssid[] = "my_ssid";
-static const char password[] = "my_password";
-static const char host[] = "jsonplaceholder.typicode.com";
+static const char* ssid = "router power";
+static const char* password = "powertotherouter";
+static const char* host = "www.alphavantage.co";
+static const char* fingerprint = "3C B9 DA D3 0E 01 0F 53 EB B0 42 DD 39 73 44 9B 89 BD 1D BE";
 
-static int status = WL_IDLE_STATUS;
+static uint8_t status = WL_IDLE_STATUS;
 
 void setup() {
     Serial.begin(BAUD_RATE);
@@ -38,6 +39,7 @@ void setup() {
 }
 
 void loop() {
+    delay(10000);
     String response = getResponse();
     Serial.println("Response:\n");
     Serial.println(response);
@@ -48,13 +50,20 @@ String getResponse() {
     Serial.print("Connecting to ");
     Serial.println(host);
 
-    WiFiClient client;
-    if (!client.connect(host, HTTP_PORT)) {
+    WiFiClientSecure client;
+    if (!client.connect(host, HTTPS_PORT)) {
         Serial.println("Connection failed");
-        return "No response";
+        return "None";
     }
 
-    String url = "/users";
+    if (client.verify(fingerprint, host)) {
+        Serial.println("Certificate matches");
+    }
+    else {
+        Serial.println("Certificate does not match");
+    }
+
+    String url = "/query?function=TIME_SERIES_DAILY&symbol=VTTSX&apikey=AMM1WB1N7FPD4U8P";
     String request = String("GET ") + url + " HTTP/1.1\r\n" +
                             "Host: " + host + "\r\n" + 
                             "Connection: close\r\n\r\n";
@@ -72,7 +81,7 @@ String getResponse() {
     }
 
     String response = "";
-    while(client.available()){
+    while(client.available()) {
         response += client.readStringUntil('\r');
     }
 
