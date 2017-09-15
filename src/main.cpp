@@ -7,8 +7,8 @@ String getResponse();
 #define BAUD_RATE 115200
 #define HTTPS_PORT 443
 
-static const char* ssid = "router power";
-static const char* password = "powertotherouter";
+static const char* ssid = "my_ssid";
+static const char* password = "my_password";
 static const char* host = "www.alphavantage.co";
 static const char* fingerprint = "3C B9 DA D3 0E 01 0F 53 EB B0 42 DD 39 73 44 9B 89 BD 1D BE";
 
