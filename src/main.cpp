@@ -15,8 +15,12 @@ static const char* fingerprint = "3C B9 DA D3 0E 01 0F 53 EB B0 42 DD 39 73 44 9
 static uint8_t status = WL_IDLE_STATUS;
 
 void setup() {
+    
     Serial.begin(BAUD_RATE);
     while (!Serial);
+
+    ESP.wdtDisable();
+    ESP.wdtEnable(WDTO_500MS);
 
     if (WiFi.status() == WL_NO_SHIELD) {
       Serial.println("WiFi shield not present");
@@ -39,6 +43,7 @@ void setup() {
 }
 
 void loop() {
+    ESP.wdtFeed();
     delay(10000);
     String response = getResponse();
     Serial.println("Response:\n");
@@ -80,9 +85,16 @@ String getResponse() {
         delay(1000);
     }
 
-    String response = "";
+    String line, response;
     while(client.available()) {
-        response += client.readStringUntil('\r');
+        //String line = client.readStringUntil('}');
+        //Serial.print(line);
+        line = client.readStringUntil('}');
+        if (line.indexOf("(Daily)") > 1) {
+            response = line;
+            break;
+        }
+
     }
 
     Serial.println("\nClosing connection...\n");
