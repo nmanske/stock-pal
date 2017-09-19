@@ -2,17 +2,19 @@
 #include <ESP8266WiFi.h>
 #include <SPI.h>
 
-String getStockData();
+String getStockData(String symbol);
 float getCurrentPrice(String data);
 
 #define BAUD_RATE 115200
 #define HTTPS_PORT 443
+
 #define NUM_PRICE_DIGITS 6
 
-static const char* ssid = "router power";
-static const char* password = "routerpowerhour";
+static const char* ssid = "my_ssid";
+static const char* password = "my_password";
 static const char* host = "www.alphavantage.co";
 static const char* fingerprint = "3C B9 DA D3 0E 01 0F 53 EB B0 42 DD 39 73 44 9B 89 BD 1D BE";
+static const char* symbols[] = {"AMD", "AMZN", "SNAP", "VTTSX"};
 
 static uint8_t status = WL_IDLE_STATUS;
 
@@ -47,14 +49,15 @@ void setup() {
 void loop() {
     ESP.wdtFeed();
     delay(10000);
-    String data = getStockData();
+    String symbol = symbols[random(0,4)];
+    String data = getStockData(symbol);
     float price = getCurrentPrice(data);
     Serial.println("The current price is:");
     Serial.println(price);
     Serial.println();
 }
 
-String getStockData() {
+String getStockData(String symbol) {
     Serial.print("Connecting to ");
     Serial.println(host);
 
@@ -71,7 +74,7 @@ String getStockData() {
         Serial.println("Certificate does not match");
     }
 
-    String url = "/query?function=TIME_SERIES_DAILY&symbol=VTTSX&apikey=AMM1WB1N7FPD4U8P";
+    String url = "/query?function=TIME_SERIES_DAILY&symbol=" + symbol + "&apikey=AMM1WB1N7FPD4U8P";
     String request = String("GET ") + url + " HTTP/1.1\r\n" +
                             "Host: " + host + "\r\n" + 
                             "Connection: close\r\n\r\n";
@@ -110,7 +113,7 @@ float getCurrentPrice(String data) {
     char c_price[NUM_PRICE_DIGITS];
     for (i = 0; i < data.length(); i++) {
         if (data[i] == 'o' && data[i+1] == 'p' && data[i+2] == 'e' && data[i+3] == 'n') {
-            for (j = 0; j < NUM_PRICE_DIGITS; j++) {
+            for (j = 0; j <= NUM_PRICE_DIGITS; j++) {
                 c_price[j] = data[i+j+8];
             }
         }
