@@ -2,13 +2,15 @@
 #include <ESP8266WiFi.h>
 #include <SPI.h>
 
-String getResponse();
+String getStockData();
+float getCurrentPrice(String data);
 
 #define BAUD_RATE 115200
 #define HTTPS_PORT 443
+#define NUM_PRICE_DIGITS 6
 
-static const char* ssid = "my_ssid";
-static const char* password = "my_password";
+static const char* ssid = "router power";
+static const char* password = "routerpowerhour";
 static const char* host = "www.alphavantage.co";
 static const char* fingerprint = "3C B9 DA D3 0E 01 0F 53 EB B0 42 DD 39 73 44 9B 89 BD 1D BE";
 
@@ -45,13 +47,14 @@ void setup() {
 void loop() {
     ESP.wdtFeed();
     delay(10000);
-    String response = getResponse();
-    Serial.println("Response:\n");
-    Serial.println(response);
+    String data = getStockData();
+    float price = getCurrentPrice(data);
+    Serial.println("The current price is:");
+    Serial.println(price);
     Serial.println();
 }
 
-String getResponse() {
+String getStockData() {
     Serial.print("Connecting to ");
     Serial.println(host);
 
@@ -87,8 +90,6 @@ String getResponse() {
 
     String line, response;
     while(client.available()) {
-        //String line = client.readStringUntil('}');
-        //Serial.print(line);
         line = client.readStringUntil('}');
         if (line.indexOf("(Daily)") > 1) {
             response = line;
@@ -97,7 +98,22 @@ String getResponse() {
 
     }
 
+    Serial.println("Response:\n");
+    Serial.println(response);
     Serial.println("\nClosing connection...\n");
 
     return response;
+}
+
+float getCurrentPrice(String data) {
+    int i, j;
+    char c_price[NUM_PRICE_DIGITS];
+    for (i = 0; i < data.length(); i++) {
+        if (data[i] == 'o' && data[i+1] == 'p' && data[i+2] == 'e' && data[i+3] == 'n') {
+            for (j = 0; j < NUM_PRICE_DIGITS; j++) {
+                c_price[j] = data[i+j+8];
+            }
+        }
+    }
+    return (float) atof(c_price);
 }
