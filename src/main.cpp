@@ -2,42 +2,65 @@
 #include <ESP8266WiFi.h>
 #include <SPI.h>
 
+void connect(void);
+String getStockSymbol(void);
 String getStockData(String symbol);
 float getCurrentPrice(String data);
 
+#define RED_PIN 16
+#define GREEN_PIN 0
+#define BLUE_PIN 2
 #define BAUD_RATE 115200
 #define HTTPS_PORT 443
 
+#define NUM_STOCK_SYMBOLS 4
 #define NUM_PRICE_DIGITS 6
 
 static const char* ssid = "my_ssid";
 static const char* password = "my_password";
 static const char* host = "www.alphavantage.co";
 static const char* fingerprint = "3C B9 DA D3 0E 01 0F 53 EB B0 42 DD 39 73 44 9B 89 BD 1D BE";
-static const char* symbols[] = {"AMD", "AMZN", "SNAP", "VTTSX"};
+static const char* symbols[NUM_STOCK_SYMBOLS] = {"AMD", "AMZN", "SNAP", "VTTSX"};
 
 static uint8_t status = WL_IDLE_STATUS;
+static uint8_t symbol_index = 0;
+static float stock_prices[NUM_STOCK_SYMBOLS];
 
-void setup() {
+void setup(void) {
+    pinMode(RED_PIN, OUTPUT);
+    pinMode(GREEN_PIN, OUTPUT);
+    pinMode(BLUE_PIN, OUTPUT);
+
+    ESP.wdtDisable();
+    ESP.wdtEnable(WDTO_500MS);
     
     Serial.begin(BAUD_RATE);
     while (!Serial);
 
-    ESP.wdtDisable();
-    ESP.wdtEnable(WDTO_500MS);
+    connect();
+}
 
+void loop(void) {
+    delay(10000);
+    ESP.wdtFeed();    
+    String symbol = getStockSymbol();
+    String data = getStockData(symbol);
+    float price = getCurrentPrice(data);
+}
+
+void connect(void) {
     if (WiFi.status() == WL_NO_SHIELD) {
-      Serial.println("WiFi shield not present");
-      while (true);
+        Serial.println("WiFi shield not present");
+        while (true);
     }
-
+  
     while (WiFi.status() != WL_CONNECTED) {
         Serial.print("Attempting to connect to SSID: ");
         Serial.println(ssid);
         status = WiFi.begin(ssid, password);
         delay(10000);
     }
-
+  
     Serial.println("\nWiFi connected");
     Serial.print("IP address: ");
     Serial.println(WiFi.localIP());
@@ -46,15 +69,11 @@ void setup() {
     Serial.println(" dbm\n");
 }
 
-void loop() {
-    ESP.wdtFeed();
-    delay(10000);
-    String symbol = symbols[random(0,4)];
-    String data = getStockData(symbol);
-    float price = getCurrentPrice(data);
-    Serial.println("The current price is:");
-    Serial.println(price);
-    Serial.println();
+String getStockSymbol(void) {
+    if (++symbol_index == NUM_STOCK_SYMBOLS) {
+        symbol_index = 0;
+    }
+    return symbols[symbol_index];
 }
 
 String getStockData(String symbol) {
@@ -69,8 +88,7 @@ String getStockData(String symbol) {
 
     if (client.verify(fingerprint, host)) {
         Serial.println("Certificate matches");
-    }
-    else {
+    } else {
         Serial.println("Certificate does not match");
     }
 
@@ -84,7 +102,6 @@ String getStockData(String symbol) {
     Serial.println("Request:");
     Serial.println(request);
     Serial.println();
-
     client.print(request);
 
     while(!client.available()) {
@@ -98,7 +115,6 @@ String getStockData(String symbol) {
             response = line;
             break;
         }
-
     }
 
     Serial.println("Response:\n");
@@ -118,5 +134,9 @@ float getCurrentPrice(String data) {
             }
         }
     }
-    return (float) atof(c_price);
+    float price = (float) atof(c_price);
+    Serial.println("The current price is:");
+    Serial.println(price);
+    Serial.println();
+    return price;
 }
