@@ -4,10 +4,16 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_PCD8544.h>
 
+struct Stock_Data {
+    String symbol;
+    float current, open, close, high, low;
+    uint32_t volume;
+};
+
 void connect(void);
 String getStockSymbol(void);
-String getStockData(String symbol);
-float getCurrentPrice(String data);
+String getResponse(String symbol);
+Stock_Data parseResponse(String symbol, String response);
 void setDisplay(String symbol, float price);
 
 #define D1_PIN 5
@@ -23,7 +29,13 @@ void setDisplay(String symbol, float price);
 #define HTTPS_PORT 443
 
 #define NUM_STOCK_SYMBOLS 4
-#define NUM_PRICE_DIGITS 6
+#define MAX_PRICE_DIGITS 6
+
+#define OPEN_PRICE_OFFSET 8
+#define CLOSE_PRICE_OFFSET 9
+#define HIGH_PRICE_OFFSET 8
+#define LOW_PRICE_OFFSET 7
+#define VOLUME_OFFSET 10
 
 static const char* ssid = "my_ssid";
 static const char* password = "my_password";
@@ -54,12 +66,11 @@ void setup(void) {
 }
 
 void loop(void) {
-    delay(10000);
-    ESP.wdtFeed();    
+    ESP.wdtFeed();
     String symbol = getStockSymbol();
-    String data = getStockData(symbol);
-    float price = getCurrentPrice(data);
-    setDisplay(symbol, price);
+    String response = getResponse(symbol);
+    Stock_Data data = parseResponse(symbol, response);
+    //setDisplay(data);
 }
 
 void connect(void) {
@@ -80,7 +91,7 @@ void connect(void) {
     Serial.println(WiFi.localIP());
     Serial.print("Signal strength: ");
     Serial.print(WiFi.RSSI());
-    Serial.println(" dbm\n");
+    Serial.println(" dbm\n\n");
 }
 
 String getStockSymbol(void) {
@@ -90,7 +101,7 @@ String getStockSymbol(void) {
     return symbols[symbol_index];
 }
 
-String getStockData(String symbol) {
+String getResponse(String symbol) {
     Serial.print("Connecting to ");
     Serial.println(host);
 
@@ -138,31 +149,55 @@ String getStockData(String symbol) {
     return response;
 }
 
-float getCurrentPrice(String data) {
+Stock_Data parseResponse(String symbol, String r) {
     int i, j;
-    char c_price[NUM_PRICE_DIGITS];
-    for (i = 0; i < data.length(); i++) {
-        if (data[i] == 'o' && data[i+1] == 'p' && data[i+2] == 'e' && data[i+3] == 'n') {
-            for (j = 0; j <= NUM_PRICE_DIGITS; j++) {
-                c_price[j] = data[i+j+8];
+    Stock_Data data;
+    char temp_price[MAX_PRICE_DIGITS];
+    data.symbol = symbol;
+    for (i = 0; i < r.length(); i++) {
+        if (r[i] == 'o' && r[i+1] == 'p' && r[i+2] == 'e' && r[i+3] == 'n') {
+            for (j = 0; j <= MAX_PRICE_DIGITS; j++) {
+                temp_price[j] = r[i+j+OPEN_PRICE_OFFSET];
             }
-        }
+            data.open = (float) atof(temp_price);
+        } else if (r[i] == 'c' && r[i+1] == 'l' && r[i+2] == 'o' && r[i+3] == 's' && r[i+4] == 'e') {
+            for (j = 0; j <= MAX_PRICE_DIGITS; j++) {
+                temp_price[j] = r[i+j+CLOSE_PRICE_OFFSET];
+            }
+            data.close = (float) atof(temp_price);
+        } else if (r[i] == 'h' && r[i+1] == 'i' && r[i+2] == 'g' && r[i+3] == 'h') {
+            for (j = 0; j <= MAX_PRICE_DIGITS; j++) {
+                temp_price[j] = r[i+j+HIGH_PRICE_OFFSET];
+            }
+            data.high = (float) atof(temp_price);
+        } else if (r[i] == 'l' && r[i+1] == 'o' && r[i+2] == 'w') {
+            for (j = 0; j <= MAX_PRICE_DIGITS; j++) {
+                temp_price[j] = r[i+j+LOW_PRICE_OFFSET];
+            }
+            data.low = (float) atof(temp_price);
+        } 
     }
-    float price = (float) atof(c_price);
-    Serial.println("The current price is:");
-    Serial.println(price);
+    Serial.print("Symbol: ");
+    Serial.println(data.symbol);
+    Serial.print("Open: ");
+    Serial.println(data.open);
+    Serial.print("Close: ");
+    Serial.println(data.close);
+    Serial.print("High: ");
+    Serial.println(data.high);
+    Serial.print("Low: ");
+    Serial.println(data.low);
     Serial.println();
-    return price;
+
+    return data;
 }
 
 void setDisplay(String symbol, float price) {
     display.clearDisplay();
     display.setCursor(0,0);
-    display.setTextSize(2);
+    display.setTextSize(1);
     display.setTextColor(BLACK);
     display.println(symbol);
-    display.print("$");
     display.println(price);
-    display.print("INCR");
     display.display();
 }
