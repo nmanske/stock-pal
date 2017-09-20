@@ -4,6 +4,8 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_PCD8544.h>
 
+/* Add status enum here (increase, decrease, same) for stock data struct */
+
 struct Stock_Data {
     String symbol;
     float current, open, close, high, low;
@@ -150,10 +152,10 @@ String getResponse(String symbol) {
 }
 
 Stock_Data parseResponse(String symbol, String r) {
-    int i, j;
     Stock_Data data;
-    char temp_price[MAX_PRICE_DIGITS];
     data.symbol = symbol;
+    char temp_price[MAX_PRICE_DIGITS];
+    int i, j;
     for (i = 0; i < r.length(); i++) {
         if (r[i] == 'o' && r[i+1] == 'p' && r[i+2] == 'e' && r[i+3] == 'n') {
             for (j = 0; j <= MAX_PRICE_DIGITS; j++) {
@@ -176,6 +178,11 @@ Stock_Data parseResponse(String symbol, String r) {
             }
             data.low = (float) atof(temp_price);
         } 
+        /*else if (r[i] == 'c' && r[i+1] == 'l' && r[i+2] == 'o' && r[i+3] == 's' && r[i+4] == 'e') {
+            while() {
+                temp_price[j] = r[i+j+LOW_PRICE_OFFSET];
+            }
+        }*/
     }
     Serial.print("Symbol: ");
     Serial.println(data.symbol);
@@ -192,7 +199,7 @@ Stock_Data parseResponse(String symbol, String r) {
     return data;
 }
 
-void setDisplay(String symbol, float price) {
+void setDisplay(Stock_Data data) {
     display.clearDisplay();
     display.setCursor(0,0);
     display.setTextSize(1);
