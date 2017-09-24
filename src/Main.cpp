@@ -8,10 +8,7 @@
 
 #define BAUD_RATE 9600
 
-static Stock AMD ("AMD");
-static Stock AMZN ("AMZN");
-static Stock SNAP ("SNAP");
-static Stock VTTSX ("VTTSX");
+static String stock_list[3] = {"AMD", "AMZN", "SNAP"};
 
 void setup(void) {
     Serial.begin(BAUD_RATE);
@@ -22,12 +19,11 @@ void setup(void) {
 }
 
 void loop(void) {
-    AMD.update();
-    setDisplay(AMD);
-    AMZN.update();
-    setDisplay(AMZN);
-    SNAP.update();
-    setDisplay(SNAP);
-    VTTSX.update();
-    setDisplay(VTTSX);
+    for(int i = 0; i < 3; i++) {
+        Stock stock = stock_list[i];
+        String data = getStockData(stock.getSymbol());
+        stock.update(data);
+        setLED(stock.getTrend());
+        setDisplay(stock);
+    }
 }

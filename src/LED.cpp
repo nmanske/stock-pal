@@ -13,7 +13,15 @@ void initLED(void) {
     pinMode(BLUE_PIN, OUTPUT);
 }
 
-void setLED(int red, int green, int blue) {
+void setLED(Trend trend) {
+    int red = 0, blue = 0, green = 0;
+    if (trend == NO_CHANGE) {
+        blue = 255;
+    } else if (trend == INCREASE) {
+        green = 255;
+    } else if (trend == DECREASE) {
+        red = 255;
+    }
     analogWrite(RED_PIN, red);
     analogWrite(GREEN_PIN, green);
     analogWrite(BLUE_PIN, blue);  

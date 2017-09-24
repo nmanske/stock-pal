@@ -14,7 +14,7 @@ class Stock {
         volume = 0;
         trend = NO_CHANGE;
     }
-    void update(void);
+    void update(String data);
     String getSymbol(void) { return symbol; }
     float getCurrentPrice(void) { return current; }
     float getOpenPrice(void) { return open; }

@@ -32,7 +32,7 @@ void initWiFi(void) {
     Serial.println(" dbm\n\n");
 }
 
-String getResponse(String symbol) {
+String getStockData(String symbol) {
     Serial.print("Connecting to ");
     Serial.println(host);
 
