@@ -17,12 +17,12 @@ void initDisplay(void) {
     display.setContrast(50);
 }
 
-void setDisplay(Stock_Data data) {
+void setDisplay(Stock stock) {
     display.clearDisplay();
     display.setCursor(0,0);
     display.setTextSize(1);
     display.setTextColor(BLACK);
-    display.println(data.symbol);
-    display.println(data.open);
+    display.println(stock.getSymbol());
+    display.println(stock.getOpenPrice());
     display.display();
 }

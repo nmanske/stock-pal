@@ -1,5 +1,6 @@
 #include <Arduino.h>
 
+#include "LED.h"
 #include "Stock.h"
 
 #define RED_PIN 16

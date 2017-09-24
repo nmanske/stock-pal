@@ -8,6 +8,6 @@ struct Display_State {
 };
 
 void initDisplay(void);
-void setDisplay(Stock_Data data);
+void setDisplay(Stock stock);
 
 #endif

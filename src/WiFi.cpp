@@ -1,5 +1,7 @@
 #include <ESP8266WiFi.h>
 
+#include "WiFi.h"
+
 #define HTTPS_PORT 443
 
 static const char* ssid = "my_ssid";
