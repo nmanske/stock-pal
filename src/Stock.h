@@ -8,12 +8,9 @@ class Stock {
     float current, open, close, high, low;
     uint32_t volume;
     Trend trend;
+    static uint8_t total;
   public:
-    Stock(String s) : symbol(s) { 
-        current = open = close = high = low = 0.0f;
-        volume = 0;
-        trend = NO_CHANGE;
-    }
+    Stock(String s);
     void update(String data);
     String getSymbol(void) { return symbol; }
     float getCurrentPrice(void) { return current; }
@@ -23,6 +20,7 @@ class Stock {
     float getLowPrice(void) { return low; }
     uint32_t getVolume(void) { return volume; }
     Trend getTrend(void) { return trend; }
+    uint8_t getTotal(void) { return total; } 
 };
 
 #endif

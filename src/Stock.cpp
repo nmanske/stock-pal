@@ -11,6 +11,15 @@
 #define LOW_PRICE_OFFSET 7
 #define VOLUME_OFFSET 10
 
+uint8_t Stock::total = 0;
+
+Stock::Stock(String s) : symbol(s) {
+    current = open = close = high = low = 0.0f;
+    volume = 0;
+    trend = NO_CHANGE;
+    total++;
+}
+
 void Stock::update(String data) {
     char temp_price[MAX_PRICE_DIGITS];
     int pos_open = data.indexOf("open");
@@ -19,7 +28,6 @@ void Stock::update(String data) {
     }
     float last = open;
     open = (float) atof(temp_price);
-    
     if (open == last) {
         trend = NO_CHANGE;
     } else if (open > last) {
