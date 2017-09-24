@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <EEPROM.h>
 
 #include "Display.h"
 #include "LED.h"
@@ -6,6 +7,11 @@
 #include "WiFi.h"
 
 #define BAUD_RATE 9600
+
+static Stock AMD ("AMD");
+static Stock AMZN ("AMZN");
+static Stock SNAP ("SNAP");
+static Stock VTTSX ("VTTSX");
 
 void setup(void) {
     Serial.begin(BAUD_RATE);
@@ -16,10 +22,6 @@ void setup(void) {
 }
 
 void loop(void) {
-    Stock AMD ("AMD");
-    Stock AMZN ("AMZN");
-    Stock SNAP ("SNAP");
-    Stock VTTSX ("VTTSX");
     AMD.update();
     setDisplay(AMD);
     AMZN.update();

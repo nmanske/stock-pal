@@ -2,6 +2,6 @@
 #define LED_H
 
 void initLED(void);
-void setLED(void);
+void setLED(int red, int green, int blue);
 
 #endif

@@ -13,6 +13,8 @@ void initLED(void) {
     pinMode(BLUE_PIN, OUTPUT);
 }
 
-void setLED(void) {
-
+void setLED(int red, int green, int blue) {
+    analogWrite(RED_PIN, red);
+    analogWrite(GREEN_PIN, green);
+    analogWrite(BLUE_PIN, blue);  
 }

@@ -1,5 +1,6 @@
 #include <Arduino.h>
 
+#include "LED.h"
 #include "Stock.h"
 #include "WiFi.h"
 
@@ -18,13 +19,25 @@ void Stock::update(void) {
     char temp_price[MAX_PRICE_DIGITS];
     char temp_volume[MAX_VOLUME_DIGITS];
     int i, pos_open, pos_close, pos_high, pos_low, pos_volume;
+    float last;
 
     pos_open = r.indexOf("open");
     if (pos_open > 0) {
         for (i = 0; i <= MAX_PRICE_DIGITS; i++) {
             temp_price[i] = r[pos_open+OPEN_PRICE_OFFSET+i];
         }
+        last = open;
         open = (float) atof(temp_price);
+        if (open == last) {
+            trend = NO_CHANGE;
+            setLED(0, 0, 255);
+        } else if (open > last) {
+            trend = INCREASE;
+            setLED(0, 255, 0);
+        } else if (open < last) {
+            trend = DECREASE;
+            setLED(255, 0, 0);
+        }
     }
     pos_close = r.indexOf("close");
     if (pos_close > 0) {
@@ -69,5 +82,7 @@ void Stock::update(void) {
     Serial.println(low);
     Serial.print("Volume: ");
     Serial.println(volume);
+    Serial.print("Trend: ");
+    Serial.println(trend);
     Serial.println();
 }
