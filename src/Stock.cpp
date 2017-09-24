@@ -17,8 +17,6 @@ static const char* symbols[NUM_STOCK_SYMBOLS] = {"AMD", "AMZN", "SNAP", "VTTSX"}
 static uint8_t symbol_index = 0;
 static float stock_prices[NUM_STOCK_SYMBOLS];
 
-/* Add status enum here (increase, decrease, same) for stock data struct */
-
 String getStockSymbol(void) {
     if (++symbol_index == NUM_STOCK_SYMBOLS) {
         symbol_index = 0;
